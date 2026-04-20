@@ -1,6 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
+import { TaskService } from '../services/task.service';
 
 @Component({
   selector: 'app-projects',
@@ -16,7 +17,7 @@ import { FormsModule } from '@angular/forms';
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (project of projects(); track project.id) {
+        @for (project of filteredProjects(); track project.id) {
           <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow relative group">
             
             <div class="flex justify-between items-start mb-4">
@@ -86,18 +87,29 @@ import { FormsModule } from '@angular/forms';
 })
 export class ProjectsComponent {
   toastr = inject(ToastrService);
+  private taskService = inject(TaskService);
   
   isModalOpen = signal(false);
   isSubmitting = signal(false);
 
   newProject = { title: '', client: '' };
 
-  projects = signal([
+  allProjects = signal([
     { id: 1, title: 'Website Redesign', client: 'Acme Corp', progress: 75, ownerAvatar: 'https://i.pravatar.cc/150?u=12', tasksCompleted: 15, totalTasks: 20, status: 'Active' },
     { id: 2, title: 'Mobile App V2', client: 'TechFlow', progress: 45, ownerAvatar: 'https://i.pravatar.cc/150?u=13', tasksCompleted: 9, totalTasks: 20, status: 'In Risk' },
     { id: 3, title: 'Marketing Campaign', client: 'Global Media', progress: 90, ownerAvatar: 'https://i.pravatar.cc/150?u=14', tasksCompleted: 18, totalTasks: 20, status: 'On Track' },
     { id: 4, title: 'Backend Migration', client: 'Startup Inc', progress: 20, ownerAvatar: 'https://i.pravatar.cc/150?u=15', tasksCompleted: 10, totalTasks: 50, status: 'Delayed' }
   ]);
+
+  filteredProjects = computed(() => {
+    const query = this.taskService.searchQuery().toLowerCase();
+    const projects = this.allProjects();
+    if (!query) return projects;
+    return projects.filter(p => 
+      p.title.toLowerCase().includes(query) || 
+      p.client.toLowerCase().includes(query)
+    );
+  });
 
   manageProject(title: string) {
     this.toastr.info(`Managing ${title}...`, 'Manage Project');
@@ -115,7 +127,7 @@ export class ProjectsComponent {
   submitProject() {
     this.isSubmitting.set(true);
     setTimeout(() => {
-      this.projects.update(p => [{
+      this.allProjects.update(p => [{
         id: Date.now(),
         title: this.newProject.title,
         client: this.newProject.client,

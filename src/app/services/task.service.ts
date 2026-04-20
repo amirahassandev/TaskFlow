@@ -29,6 +29,7 @@ export class TaskService {
   ];
 
   tasks = signal<Task[]>([]);
+  searchQuery = signal<string>('');
   isLoading = signal<boolean>(true);
 
   constructor() {

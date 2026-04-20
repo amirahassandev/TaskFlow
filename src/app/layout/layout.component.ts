@@ -3,6 +3,8 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { NgClass } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../services/auth.service';
+import { TaskService } from '../services/task.service';
+import { ThemeService } from '../services/theme.service';
 import {
   LucideAngularModule,
   LayoutDashboard,
@@ -15,7 +17,9 @@ import {
   Bell,
   Menu,
   ChevronLeft,
-  LogOut
+  LogOut,
+  Sun,
+  Moon
 } from 'lucide-angular';
 
 @Component({
@@ -30,6 +34,8 @@ export class LayoutComponent {
   private router = inject(Router);
   private toastr = inject(ToastrService);
   authService = inject(AuthService);
+  taskService = inject(TaskService);
+  themeService = inject(ThemeService);
 
   toggleSidebar() {
     this.isSidebarExpanded.set(!this.isSidebarExpanded());
@@ -53,7 +59,9 @@ export class LayoutComponent {
     bell: Bell,
     menu: Menu,
     chevronLeft: ChevronLeft,
-    logOut: LogOut
+    logOut: LogOut,
+    sun: Sun,
+    moon: Moon
   };
 
   navItems = [

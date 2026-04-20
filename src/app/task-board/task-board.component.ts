@@ -45,9 +45,16 @@ export class TaskBoardComponent {
     dueDate: ''
   };
 
-  todoTasks = computed(() => this.taskService.tasks().filter(t => t.status === 'todo'));
-  inProgressTasks = computed(() => this.taskService.tasks().filter(t => t.status === 'in-progress'));
-  doneTasks = computed(() => this.taskService.tasks().filter(t => t.status === 'done'));
+  filteredTasks = computed(() => {
+    const query = this.taskService.searchQuery().toLowerCase();
+    const tasks = this.taskService.tasks();
+    if (!query) return tasks;
+    return tasks.filter(t => t.title.toLowerCase().includes(query));
+  });
+
+  todoTasks = computed(() => this.filteredTasks().filter(t => t.status === 'todo'));
+  inProgressTasks = computed(() => this.filteredTasks().filter(t => t.status === 'in-progress'));
+  doneTasks = computed(() => this.filteredTasks().filter(t => t.status === 'done'));
 
   columns = computed(() => [
     { id: 'todo' as const, title: 'To Do', colorClass: 'bg-zinc-100', headerDotClass: 'bg-zinc-400', tasks: this.todoTasks() },

@@ -1,12 +1,12 @@
-<div class="flex h-screen bg-zinc-50 font-sans text-zinc-900 overflow-hidden">
+<div class="flex h-screen bg-zinc-50 dark:bg-zinc-950 font-sans text-zinc-900 dark:text-zinc-100 overflow-hidden">
   
   <!-- Sidebar -->
   <aside 
-    class="bg-white border-r border-zinc-200 flex flex-col transition-all duration-300 ease-in-out z-20 relative"
+    class="bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col transition-all duration-300 ease-in-out z-20 relative"
     [ngClass]="{'w-64': isSidebarExpanded(), 'w-20': !isSidebarExpanded()}">
     
     <!-- Sidebar Header -->
-    <div class="h-16 flex items-center px-4 justify-between border-b border-zinc-200">
+    <div class="h-16 flex items-center px-4 justify-between border-b border-zinc-200 dark:border-zinc-800">
       <div class="flex items-center gap-3 overflow-hidden" [ngClass]="{'opacity-100': isSidebarExpanded(), 'opacity-0 hidden': !isSidebarExpanded()}">
         <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
           TF
@@ -66,7 +66,7 @@
   <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
     
     <!-- Top Navbar -->
-    <header class="h-16 bg-white border-b border-zinc-200 flex flex-shrink-0 items-center justify-between px-6 z-10">
+    <header class="h-16 bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 flex flex-shrink-0 items-center justify-between px-6 z-10">
       
       <!-- Breadcrumbs Component -->
       <div class="flex items-center text-sm font-medium text-zinc-500">
@@ -84,10 +84,23 @@
           <input 
             type="text" 
             placeholder="Search tasks, projects..." 
-            class="pl-10 pr-4 py-2 w-64 rounded-lg bg-zinc-50 border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm shadow-sm placeholder:text-zinc-400">
+            (input)="taskService.searchQuery.set($any($event.target).value)"
+            class="pl-10 pr-4 py-2 w-64 rounded-lg bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm shadow-sm placeholder:text-zinc-400 dark:text-zinc-100">
         </div>
 
         <div class="flex items-center gap-4">
+          <!-- Theme Toggle -->
+          <button 
+            (click)="themeService.toggleDarkMode()"
+            class="p-2 text-zinc-500 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100"
+            title="Toggle Theme">
+            @if (themeService.darkMode()) {
+              <lucide-icon [img]="icons.sun" class="w-5 h-5"></lucide-icon>
+            } @else {
+              <lucide-icon [img]="icons.moon" class="w-5 h-5"></lucide-icon>
+            }
+          </button>
+
           <!-- Notification Bell -->
           <button class="relative p-2 text-zinc-500 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100">
             <lucide-icon [img]="icons.bell" class="w-5 h-5"></lucide-icon>
