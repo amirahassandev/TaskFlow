@@ -51,12 +51,33 @@ import { NgClass } from '@angular/common';
             </div>
             
             <div class="mt-4">
-              <div class="flex justify-between text-xs mb-1">
+              <div class="flex justify-between items-center text-xs mb-1">
                 <span class="font-medium text-zinc-600">Progress</span>
-                <span class="font-bold text-indigo-600">{{ project.progress }}%</span>
+                <div class="flex items-center gap-2">
+                  <button 
+                    (click)="changeProgress(project, -10)" 
+                    class="w-5 h-5 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded transition-colors font-bold">-</button>
+                  <span 
+                    class="font-bold w-10 text-center"
+                    [ngClass]="{
+                      'text-rose-600': project.progress < 30,
+                      'text-amber-600': project.progress >= 30 && project.progress <= 70,
+                      'text-emerald-600': project.progress > 70
+                    }">{{ project.progress }}%</span>
+                  <button 
+                    (click)="changeProgress(project, 10)" 
+                    class="w-5 h-5 flex items-center justify-center bg-zinc-100 hover:bg-zinc-200 text-zinc-600 rounded transition-colors font-bold">+</button>
+                </div>
               </div>
-              <div class="w-full bg-zinc-100 rounded-full h-2">
-                <div class="bg-indigo-600 h-2 rounded-full transition-all" [style.width.%]="project.progress"></div>
+              <div class="w-full bg-zinc-100 dark:bg-zinc-700 rounded-full h-2 overflow-hidden">
+                <div 
+                  class="h-full rounded-full transition-all duration-300" 
+                  [ngClass]="{
+                    'bg-rose-500': project.progress < 30,
+                    'bg-amber-500': project.progress >= 30 && project.progress <= 70,
+                    'bg-emerald-500': project.progress > 70
+                  }"
+                  [style.width.%]="project.progress"></div>
               </div>
             </div>
             
@@ -137,6 +158,10 @@ export class ProjectsComponent {
 
   closeModal() {
     this.isModalOpen.set(false);
+  }
+
+  changeProgress(project: Project, delta: number) {
+    this.projectService.updateProgress(project.id, delta);
   }
 
   markAsCompleted(project: Project) {

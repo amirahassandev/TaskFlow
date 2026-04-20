@@ -28,6 +28,24 @@ export class ProjectService {
     );
   }
 
+  updateProgress(projectId: number, delta: number) {
+    this.projects.update(projects => projects.map(p => {
+      if (p.id === projectId) {
+        const newProgress = Math.min(100, Math.max(0, p.progress + delta));
+        let newStatus = p.status;
+        
+        if (newProgress === 100) {
+          newStatus = 'Completed';
+        } else if (p.status === 'Completed' && newProgress < 100) {
+          newStatus = 'Active';
+        }
+        
+        return { ...p, progress: newProgress, status: newStatus };
+      }
+      return p;
+    }));
+  }
+
   addProject(project: Omit<Project, 'id' | 'progress' | 'tasksCompleted' | 'totalTasks' | 'status' | 'ownerAvatar'>) {
     const newProject: Project = {
       ...project,
