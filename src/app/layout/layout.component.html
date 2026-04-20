@@ -1,0 +1,117 @@
+<div class="flex h-screen bg-zinc-50 font-sans text-zinc-900 overflow-hidden">
+  
+  <!-- Sidebar -->
+  <aside 
+    class="bg-white border-r border-zinc-200 flex flex-col transition-all duration-300 ease-in-out z-20 relative"
+    [ngClass]="{'w-64': isSidebarExpanded(), 'w-20': !isSidebarExpanded()}">
+    
+    <!-- Sidebar Header -->
+    <div class="h-16 flex items-center px-4 justify-between border-b border-zinc-200">
+      <div class="flex items-center gap-3 overflow-hidden" [ngClass]="{'opacity-100': isSidebarExpanded(), 'opacity-0 hidden': !isSidebarExpanded()}">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold shrink-0">
+          TF
+        </div>
+        <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600 whitespace-nowrap">TaskFlow</span>
+      </div>
+      
+      <button 
+        (click)="toggleSidebar()" 
+        class="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 transition-colors mx-auto block"
+        [attr.aria-label]="isSidebarExpanded() ? 'Collapse Sidebar' : 'Expand Sidebar'">
+        @if (isSidebarExpanded()) {
+          <lucide-icon [img]="icons.chevronLeft" class="w-5 h-5"></lucide-icon>
+        } @else {
+          <lucide-icon [img]="icons.menu" class="w-5 h-5"></lucide-icon>
+        }
+      </button>
+    </div>
+
+    <!-- Navigation Area -->
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      @for (item of navItems; track item.route) {
+        @if (authService.userRole() === 'admin' || (item.label === 'My Tasks' || item.label === 'Projects' || item.label === 'Settings')) {
+          <a 
+            [routerLink]="item.route" 
+            routerLinkActive="bg-indigo-50 text-indigo-700" 
+            [routerLinkActiveOptions]="{exact: false}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all font-medium group">
+            <lucide-icon [img]="item.icon" class="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform"></lucide-icon>
+            <span 
+              class="whitespace-nowrap transition-opacity duration-300"
+              [ngClass]="{'opacity-100 block': isSidebarExpanded(), 'opacity-0 hidden': !isSidebarExpanded()}">
+              {{ item.label }}
+            </span>
+          </a>
+        }
+      }
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="p-4 border-t border-zinc-200">
+      <button 
+        (click)="logout()"
+        class="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-all font-medium group"
+        [ngClass]="{'justify-center': !isSidebarExpanded()}">
+        <lucide-icon [img]="icons.logOut" class="w-5 h-5 shrink-0 group-hover:scale-110 transition-transform"></lucide-icon>
+        <span 
+          class="whitespace-nowrap transition-opacity duration-300"
+          [ngClass]="{'opacity-100 block': isSidebarExpanded(), 'opacity-0 hidden': !isSidebarExpanded()}">
+          Logout
+        </span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    
+    <!-- Top Navbar -->
+    <header class="h-16 bg-white border-b border-zinc-200 flex flex-shrink-0 items-center justify-between px-6 z-10">
+      
+      <!-- Breadcrumbs Component -->
+      <div class="flex items-center text-sm font-medium text-zinc-500">
+        <span class="hover:text-zinc-900 cursor-pointer">Pages</span>
+        <span class="mx-2">/</span>
+        <span class="text-zinc-900 capitalize">Dashboard</span>
+      </div>
+
+      <!-- Right side actions -->
+      <div class="flex items-center gap-6">
+        
+        <!-- Search bar -->
+        <div class="relative hidden sm:block">
+          <lucide-icon [img]="icons.search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"></lucide-icon>
+          <input 
+            type="text" 
+            placeholder="Search tasks, projects..." 
+            class="pl-10 pr-4 py-2 w-64 rounded-lg bg-zinc-50 border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-sm shadow-sm placeholder:text-zinc-400">
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- Notification Bell -->
+          <button class="relative p-2 text-zinc-500 hover:text-zinc-900 transition-colors rounded-full hover:bg-zinc-100">
+            <lucide-icon [img]="icons.bell" class="w-5 h-5"></lucide-icon>
+            <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+          </button>
+          
+          <div class="h-8 w-px bg-zinc-200"></div>
+
+          <!-- Profile Dropdown Trigger -->
+          <button class="flex items-center gap-2 hover:bg-zinc-50 py-1.5 px-2 rounded-lg transition-colors">
+            <span class="text-sm font-medium text-zinc-700 hidden md:block">Alex Morrison</span>
+            <!-- Could put a chevron down icon here -->
+          </button>
+        </div>
+        
+      </div>
+    </header>
+
+    <!-- Main View Outlet Container -->
+    <main class="flex-1 overflow-y-auto bg-zinc-50/50 p-6 relative">
+      <div class="max-w-7xl mx-auto w-full h-full">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+  </div>
+</div>

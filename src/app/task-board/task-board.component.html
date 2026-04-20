@@ -1,0 +1,122 @@
+<div class="mt-8 flex flex-col md:flex-row gap-6 h-full items-start overflow-x-auto pb-4">
+  
+  @for (column of columns(); track column.id) {
+    <div [ngClass]="['w-full md:w-80 min-w-80 rounded-xl flex flex-col shrink-0', column.colorClass]">
+      
+      <!-- Column Header -->
+      <div class="p-4 flex items-center justify-between border-b border-black/5">
+        <div class="flex items-center gap-2">
+          <div [ngClass]="['w-2.5 h-2.5 rounded-full', column.headerDotClass]"></div>
+          <h3 class="font-semibold text-zinc-900">{{ column.title }}</h3>
+          <span class="ml-2 bg-white/60 px-2 py-0.5 rounded-full text-xs font-medium text-zinc-500">
+            {{ column.tasks.length }}
+          </span>
+        </div>
+        <button class="text-zinc-400 hover:text-zinc-600 transition-colors">
+          <lucide-icon [img]="icons.more" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Column Tasks -->
+      <div class="p-3 flex-1 overflow-y-auto space-y-3">
+        @for (task of column.tasks; track task.id) {
+          <div class="bg-white p-4 rounded-xl shadow-sm border border-zinc-200/60 hover:shadow-md hover:border-indigo-200 hover:-translate-y-0.5 transition-all cursor-pointer group">
+            
+            <div class="flex items-start justify-between mb-3">
+              <span [ngClass]="getPriorityColor(task.priority)" class="px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold rounded-md">
+                {{ task.priority }}
+              </span>
+              <button class="text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity hover:text-zinc-600">
+                <lucide-icon [img]="icons.more" class="w-4 h-4"></lucide-icon>
+              </button>
+            </div>
+            
+            <h4 class="font-semibold text-zinc-800 text-sm mb-3 leading-snug">{{ task.title }}</h4>
+            
+            <div class="flex items-center justify-between mt-auto">
+              <!-- Indicators -->
+              <div class="flex items-center gap-3 text-xs text-zinc-500 font-medium">
+                
+                <div class="flex items-center gap-1.5" [ngClass]="{'text-rose-500': task.dueDate === 'Yesterday'}">
+                  <lucide-icon [img]="icons.calendar" class="w-3.5 h-3.5"></lucide-icon>
+                  <span>{{ task.dueDate }}</span>
+                </div>
+                
+                <div class="flex items-center gap-1.5 text-zinc-400">
+                  <lucide-icon [img]="icons.checkSquare" class="w-3.5 h-3.5"></lucide-icon>
+                  <span>{{ task.subtasks.completed }}/{{ task.subtasks.total }}</span>
+                </div>
+
+                @if (task.comments > 0) {
+                  <div class="flex items-center gap-1.5 text-zinc-400 hidden lg:flex">
+                    <lucide-icon [img]="icons.message" class="w-3.5 h-3.5"></lucide-icon>
+                    <span>{{ task.comments }}</span>
+                  </div>
+                }
+
+              </div>
+              
+              <!-- Assignee Avatar -->
+              <div class="w-7 h-7 rounded-full bg-zinc-200 overflow-hidden ring-2 ring-white">
+                <img [src]="task.avatar" alt="Assignee" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Add Task Button Footer -->
+      <div class="p-3">
+        <button (click)="isModalOpen.set(true)" class="w-full py-2.5 flex items-center justify-center gap-2 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-200/50 rounded-lg transition-colors border border-dashed border-zinc-300 hover:border-zinc-400">
+          <lucide-icon [img]="icons.plus" class="w-4 h-4"></lucide-icon>
+          Add Task
+        </button>
+      </div>
+
+    </div>
+  }
+</div>
+
+<!-- Add Task Modal -->
+@if (isModalOpen()) {
+  <div class="fixed inset-0 bg-zinc-900/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200">
+      <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+        <h3 class="text-lg font-bold text-zinc-900">Add New Task</h3>
+        <button (click)="closeModal()" class="text-zinc-400 hover:text-zinc-600 transition-colors text-2xl">&times;</button>
+      </div>
+      
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-zinc-700 mb-1">Task Title</label>
+          <input type="text" [(ngModel)]="newTask.title" placeholder="What needs to be done?" class="w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-zinc-700 mb-1">Priority</label>
+            <select [(ngModel)]="newTask.priority" class="w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-white">
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-zinc-700 mb-1">Due Date</label>
+            <input type="text" [(ngModel)]="newTask.dueDate" placeholder="e.g. Tomorrow" class="w-full px-3 py-2 border border-zinc-300 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          </div>
+        </div>
+      </div>
+      
+      <div class="px-6 py-4 border-t border-zinc-100 bg-zinc-50 flex justify-end gap-3">
+        <button (click)="closeModal()" class="px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors">Cancel</button>
+        <button (click)="submitTask()" [disabled]="isSubmitting() || !newTask.title" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2">
+          @if(isSubmitting()) {
+            <lucide-icon [img]="icons.loader" class="w-4 h-4 animate-spin"></lucide-icon>
+          }
+          Create Task
+        </button>
+      </div>
+    </div>
+  </div>
+}
