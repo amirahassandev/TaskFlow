@@ -2,11 +2,14 @@ import { Component, inject, signal, computed } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
 import { TaskService } from '../services/task.service';
+import { ProjectService, Project } from '../services/project.service';
+import { AuthService } from '../services/auth.service';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NgClass],
   template: `
     <div class="space-y-6">
       <div class="flex justify-between items-center">
@@ -18,16 +21,33 @@ import { TaskService } from '../services/task.service';
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @for (project of filteredProjects(); track project.id) {
-          <div class="bg-white p-5 rounded-xl border border-zinc-200 shadow-sm hover:shadow-md transition-shadow relative group">
+          <div 
+            class="bg-white p-5 rounded-xl border-2 shadow-sm transition-all relative group"
+            [ngClass]="project.status === 'Completed' ? 'border-emerald-500 shadow-emerald-50' : 'border-zinc-200 hover:shadow-md'">
+            
+            @if (project.status === 'Completed') {
+              <div class="absolute -top-3 -right-3 bg-emerald-500 text-white p-1 rounded-full shadow-lg z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+              </div>
+            }
             
             <div class="flex justify-between items-start mb-4">
               <div>
                 <h3 class="text-lg font-bold text-zinc-900">{{ project.title }}</h3>
                 <p class="text-sm text-zinc-500 mt-1">{{ project.client }}</p>
               </div>
-              <button (click)="manageProject(project.title)" class="opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs px-2 py-1 rounded-md font-medium">
-                Manage
-              </button>
+              <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                @if (authService.userRole() === 'admin' && project.status !== 'Completed') {
+                  <button (click)="markAsCompleted(project)" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-2 py-1 rounded-md font-medium">
+                    Complete
+                  </button>
+                }
+                <button (click)="manageProject(project.title)" class="bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-xs px-2 py-1 rounded-md font-medium">
+                  Manage
+                </button>
+              </div>
             </div>
             
             <div class="mt-4">
@@ -88,22 +108,17 @@ import { TaskService } from '../services/task.service';
 export class ProjectsComponent {
   toastr = inject(ToastrService);
   private taskService = inject(TaskService);
+  private projectService = inject(ProjectService);
+  authService = inject(AuthService);
   
   isModalOpen = signal(false);
   isSubmitting = signal(false);
 
   newProject = { title: '', client: '' };
 
-  allProjects = signal([
-    { id: 1, title: 'Website Redesign', client: 'Acme Corp', progress: 75, ownerAvatar: 'https://i.pravatar.cc/150?u=12', tasksCompleted: 15, totalTasks: 20, status: 'Active' },
-    { id: 2, title: 'Mobile App V2', client: 'TechFlow', progress: 45, ownerAvatar: 'https://i.pravatar.cc/150?u=13', tasksCompleted: 9, totalTasks: 20, status: 'In Risk' },
-    { id: 3, title: 'Marketing Campaign', client: 'Global Media', progress: 90, ownerAvatar: 'https://i.pravatar.cc/150?u=14', tasksCompleted: 18, totalTasks: 20, status: 'On Track' },
-    { id: 4, title: 'Backend Migration', client: 'Startup Inc', progress: 20, ownerAvatar: 'https://i.pravatar.cc/150?u=15', tasksCompleted: 10, totalTasks: 50, status: 'Delayed' }
-  ]);
-
   filteredProjects = computed(() => {
     const query = this.taskService.searchQuery().toLowerCase();
-    const projects = this.allProjects();
+    const projects = this.projectService.projects();
     if (!query) return projects;
     return projects.filter(p => 
       p.title.toLowerCase().includes(query) || 
@@ -124,22 +139,21 @@ export class ProjectsComponent {
     this.isModalOpen.set(false);
   }
 
+  markAsCompleted(project: Project) {
+    this.projectService.updateProjectStatus(project.id, 'Completed');
+    this.toastr.success(`${project.title} marked as completed!`, 'Project Updated');
+  }
+
   submitProject() {
     this.isSubmitting.set(true);
     setTimeout(() => {
-      this.allProjects.update(p => [{
-        id: Date.now(),
+      this.projectService.addProject({
         title: this.newProject.title,
-        client: this.newProject.client,
-        progress: 0,
-        ownerAvatar: 'https://i.pravatar.cc/150?u=99',
-        tasksCompleted: 0,
-        totalTasks: 0,
-        status: 'Active'
-      }, ...p]);
+        client: this.newProject.client
+      });
       
       this.isSubmitting.set(false);
-      this.closeModal();
+      this.isModalOpen.set(false);
       this.toastr.success('Project added successfully!', 'Success');
     }, 800);
   }
