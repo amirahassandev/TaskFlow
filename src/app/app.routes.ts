@@ -3,13 +3,13 @@ import { LayoutComponent } from './layout/layout.component';
 import { adminGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', loadComponent: () => import('./auth/login.component').then(m => m.LoginComponent) },
+  { path: '', loadComponent: () => import('./auth/login.component').then(m => m.LoginComponent) },
   { path: 'register', loadComponent: () => import('./auth/register.component').then(m => m.RegisterComponent) },
   {
     path: '',
     component: LayoutComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', redirectTo: 'dashboard', pathMatch: 'full' },
       { 
         path: 'dashboard', 
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
